@@ -6,7 +6,7 @@ import numpy as np
 from io import StringIO
 
 #set titles
-st.title('No Dems Left Behind Dashboard')
+st.title('No Dem Left Behind Dashboard')
 
 st.header('ActBlue Data Processing Tool', divider='rainbow')
 
