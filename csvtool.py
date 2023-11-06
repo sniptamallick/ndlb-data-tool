@@ -46,7 +46,7 @@ if set(['DONATION_TOTAL','NUMBER_OF_DONATIONS']).issubset(dataframe.columns):
 
     #rename columns 
     final_df = final_df.rename(columns={"DONATION_TOTAL_x": "DONATION_TOTAL", "NUMBER_OF_DONATIONS_x": "NUMBER_OF_DONATIONS"})
-    final_df = final_df.drop_duplicates(subset=['First Name', 'Last Name', 'Donor Email])
+    final_df = final_df.drop_duplicates(subset=['First Name', 'Last Name', 'Donor Email'])
 
 
 elif set(['Amount', 'Donor First Name', 'Donor Last Name']).issubset(dataframe.columns):
