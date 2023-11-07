@@ -12,6 +12,11 @@ st.header('ActBlue Call List Generation Tool', divider='rainbow')
 
 #csv upload 
 st.header('1. File Upload')
+
+st.caption("--------------------------------------------------------------------------------------------------------")
+st.caption(" File needs the following columns: 'Donor First Name', 'Donor Last Name', 'Donor Email', and 'Donor State'")
+st.caption("--------------------------------------------------------------------------------------------------------")
+
 uploaded_file = st.file_uploader("Upload ActBlue Report (.csv only)")
 
 #csv upload 
