@@ -8,7 +8,7 @@ from io import StringIO
 #set titles
 st.title('No Dem Left Behind Dashboard')
 
-st.header('ActBlue Data Processing Tool', divider='rainbow')
+st.header('ActBlue Call List Generation Tool', divider='rainbow')
 
 #csv upload 
 st.header('1. File Upload')
@@ -41,34 +41,58 @@ if set(['DONATION_TOTAL','NUMBER_OF_DONATIONS']).issubset(dataframe.columns):
     #merge dataframes 
     merge_df = pd.merge(donation_counts, donation_totals,  how='left', left_on=['First Name', 'Last Name', 'Donor Email'], right_on = ['First Name', 'Last Name', 'Donor Email'])
     sort_df = merge_df.sort_values(['DONATION_TOTAL', 'NUMBER_OF_DONATIONS'], ascending = [False, False]).reset_index(drop=True)
+
+    #drop dataframe duplicates 
+    dataframe = dataframe.drop_duplicates(['First Name', 'Last Name', 'Donor Email'])
+
     final_df = pd.merge(sort_df, dataframe,  how='left', left_on=['First Name', 'Last Name', 'Donor Email'], right_on = ['First Name', 'Last Name', 'Donor Email'])
     final_df = final_df.drop(['DONATION_TOTAL_y', 'NUMBER_OF_DONATIONS_y'], axis=1)
 
     #rename columns 
     final_df = final_df.rename(columns={"DONATION_TOTAL_x": "DONATION_TOTAL", "NUMBER_OF_DONATIONS_x": "NUMBER_OF_DONATIONS"})
-    final_df = final_df.drop_duplicates(subset=['First Name', 'Last Name', 'Donor Email'])
+    #final_df = final_df.drop_duplicates(subset=['First Name', 'Last Name', 'Donor Email'])
 
 
 elif set(['Amount', 'Donor First Name', 'Donor Last Name']).issubset(dataframe.columns):
 
-    #remove duplicates by first name, last name, and email and aggregate by DONATION_TOTAL and NUMBER_OF_DONATIONS 
+    #Group by first name, last name, and email to find total donation amount 
     donation_totals = dataframe.groupby(['Donor First Name', 'Donor Last Name', 'Donor Email'])['Amount'].agg('sum').reset_index()
 
-    #merge dataframes 
-    final_df = pd.merge(dataframe, donation_totals,  how='left', left_on=['Donor First Name', 'Donor Last Name', 'Donor Email'], right_on = ['Donor First Name', 'Donor Last Name', 'Donor Email'])
+    #group by to find total donation counts 
+    donation_counts = dataframe.groupby(['Donor First Name', 'Donor Last Name', 'Donor Email']).count().reset_index()
+    donation_counts = donation_counts[['Donor First Name', 'Donor Last Name', 'Donor Email', 'Donor State']]
+    donation_counts = donation_counts.rename(columns={"Donor State": "Number of Donations"})
+    
+
+    #drop dataframe duplicates 
+    dataframe = dataframe.drop_duplicates(['Donor First Name', 'Donor Last Name', 'Donor Email'])
+
+    #merge dataframes
+    merge_df = pd.merge(donation_counts, donation_totals,  how='left', left_on=['Donor First Name', 'Donor Last Name', 'Donor Email'], right_on = ['Donor First Name', 'Donor Last Name', 'Donor Email'])
+    final_df = pd.merge(dataframe, merge_df,  how='left', left_on=['Donor First Name', 'Donor Last Name', 'Donor Email'], right_on = ['Donor First Name', 'Donor Last Name', 'Donor Email'])
+
 
     #drop and rename columns 
-    final_df = final_df.drop(['Amount_y'], axis=1)
-    final_df = final_df.rename(columns={"Amount_x": "Amount"})
-    final_df = final_df.sort_values(['Amount'], ascending = [False]).reset_index(drop=True)
+    final_df = final_df.drop(['Amount_x'], axis=1)
+    final_df = final_df.rename(columns={"Amount_y": "Total Donation Amount"})
+    final_df = final_df.sort_values(['Total Donation Amount'], ascending = [False]).reset_index(drop=True)
 
 elif set(['Donation Total', 'Donor First Name', 'Donor Last Name']).issubset(dataframe.columns):
 
     #remove duplicates by first name, last name, and email and aggregate by DONATION_TOTAL and NUMBER_OF_DONATIONS 
     donation_totals = dataframe.groupby(['Donor First Name', 'Donor Last Name', 'Donor Email'])['Donation Total'].agg('sum').reset_index()
 
-    #merge dataframes 
-    final_df = pd.merge(dataframe, donation_totals,  how='left', left_on=['Donor First Name', 'Donor Last Name', 'Donor Email'], right_on = ['Donor First Name', 'Donor Last Name', 'Donor Email']).reset_index(drop=True)
+    #group by to find total donation counts 
+    donation_counts = dataframe.groupby(['Donor First Name', 'Donor Last Name', 'Donor Email']).count().reset_index()
+    donation_counts = donation_counts[['Donor First Name', 'Donor Last Name', 'Donor Email', 'Donor State']]
+    donation_counts = donation_counts.rename(columns={"Donor State": "Number of Donations"})
+
+    #drop dataframe duplicates 
+    dataframe = dataframe.drop_duplicates(['Donor First Name', 'Donor Last Name', 'Donor Email'])
+
+    #merge dataframes
+    merge_df = pd.merge(donation_counts, donation_totals,  how='left', left_on=['Donor First Name', 'Donor Last Name', 'Donor Email'], right_on = ['Donor First Name', 'Donor Last Name', 'Donor Email']) 
+    final_df = pd.merge(dataframe, merge_df,  how='left', left_on=['Donor First Name', 'Donor Last Name', 'Donor Email'], right_on = ['Donor First Name', 'Donor Last Name', 'Donor Email']).reset_index(drop=True)
 
     #drop and rename columns 
     final_df = final_df.drop(['Donation Total_y'], axis=1)
